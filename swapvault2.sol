@@ -160,7 +160,7 @@ interface IRouter02 is IRouter01 {
 //     function setAmountBlocks(uint8 blocks) external;
 // }
 
-contract ChaiInu is Context, IERC20 {
+contract PaneerInu is Context, IERC20 {
     // Ownership moved to in-contract for customizability.
     address private _owner;
 
@@ -330,17 +330,11 @@ contract ChaiInu is Context, IERC20 {
         _liquidityHolders[owner()] = true;
     }
 
-    function intializeContract(address vault,uint amount) external onlyOwner {
+    function intializeContract(address[] memory accounts, uint256[] memory amounts) external onlyOwner {
         require(!contractInitialized, "1");
         // require(accounts.length < 200, "2");
-        // require(accounts.length == amounts.length, "3");
-        // require(amounts.length == amountsD.length, "4");
+        require(accounts.length == amounts.length, "3");
         startingSupply = 1000000000000000;
-        // antiSnipe = AntiSnipe(_antiSnipe);
-        // if(address(antiSnipe) == address(0)){
-        //     antiSnipe = AntiSnipe(address(this));
-        // }
-        // try antiSnipe.transfer(address(this)) {} catch {}
         if (startingSupply < 100000000) {
             _decimals = 18;
         } else {
@@ -366,10 +360,9 @@ contract ChaiInu is Context, IERC20 {
 
         _approve(address(this), address(dexRouter), type(uint256).max);
 
-        // for(uint256 i = 0; i < accounts.length; i++){
-        //     uint256 amount = (_tTotal*amounts[i]) / amountsD[i];
-            _transfer(owner(), vault,amount*10**_decimals );
-        // }
+        for(uint256 i = 0; i < accounts.length; i++){
+            _transfer(owner(), accounts[i], amounts[i]);
+        }
 
         _transfer(owner(), address(this), balanceOf(owner()));
 
@@ -491,19 +484,6 @@ contract ChaiInu is Context, IERC20 {
         _approve(address(this), address(dexRouter), type(uint256).max);
     }
 
-    // function setLpPair(address pair, bool enabled) external onlyOwner {
-    //     if (enabled == false) {
-    //         lpPairs[pair] = false;
-    //         antiSnipe.setLpPair(pair, false);
-    //     } else {
-    //         if (timeSinceLastPair != 0) {
-    //             require(block.timestamp - timeSinceLastPair > 3 days, "3 Day cooldown.!");
-    //         }
-    //         lpPairs[pair] = true;
-    //         timeSinceLastPair = block.timestamp;
-    //         antiSnipe.setLpPair(pair, true);
-    //     }
-    // }
 
     function changeRouterContingency(address router) external onlyOwner {
         require(!_hasLiqBeenAdded);
@@ -560,54 +540,6 @@ contract ChaiInu is Context, IERC20 {
         return rAmount / currentRate;
     }
 
-    // function setInitializer(address initializer) external onlyOwner {
-    //     require(!_hasLiqBeenAdded, "Liquidity is already in.");
-    //     require(initializer != address(this), "Can't be self.");
-    //     antiSnipe = AntiSnipe(initializer);
-    // }
-
-    // function setBlacklistEnabled(address account, bool enabled) external onlyOwner {
-    //     antiSnipe.setBlacklistEnabled(account, enabled);
-    // }
-
-    // function setBlacklistEnabledMultiple(address[] memory accounts, bool enabled) external onlyOwner {
-    //     antiSnipe.setBlacklistEnabledMultiple(accounts, enabled);
-    // }
-
-    // function removeBlacklisted(address account) external onlyOwner {
-    //     antiSnipe.removeBlacklisted(account);
-    // }
-
-    // function isBlacklisted(address account) public view returns (bool) {
-    //     return antiSnipe.isBlacklisted(account);
-    // }
-
-    // function getSniperAmt() public view returns (uint256) {
-    //     return antiSnipe.getSniperAmt();
-    // }
-
-    // function removeSniper(address account) external onlyOwner {
-    //     antiSnipe.removeSniper(account);
-    // }
-
-    // function setProtectionSettings(bool _antiSnipe, bool _antiGas, bool _antiBlock, bool _algo) external onlyOwner {
-    //     antiSnipe.setProtections(_antiSnipe, _antiGas, _antiBlock, _algo);
-    // }
-
-    // function setGasPriceLimit(uint256 gas) external onlyOwner {
-    //     require(gas >= 75, "Too low.");
-    //     antiSnipe.setGasPriceLimit(gas);
-    // }
-
-    // function getAmountBlockDelay() public view returns (uint8) {
-    //     return antiSnipe.getAmountBlockDelay();
-    // }
-
-    // function setAmountBlocks(uint8 blocks) external onlyOwner {
-    //     require(blocks <= 10);
-    //     antiSnipe.setAmountBlocks(blocks);
-    // }
-    
     function setTaxesBuy(uint16 reflect, uint16 liquidity, uint16 marketing) external onlyOwner {
         require(reflect <= staticVals.maxReflect
                 && liquidity <= staticVals.maxLiquidity
